@@ -1,0 +1,62 @@
+# Azure Pipeline that run basic continuous integration on a Terraform project
+
+# This makes sure the pipeline is triggered every time code is pushed in the validation-testing example source, on all branches.
+trigger:
+  branches:
+    include:
+    - '*'
+  paths:
+    include:
+    - 'deploy/pipelines/*'
+
+variables:
+  # There must be an Azure Service Connection with that name defined in your Azure DevOps settings. See https://docs.microsoft.com/en-us/azure/devops/pipelines/library/connect-to-azure?view=azure-devops
+  serviceConnection: 'abc'
+  azureLocation: 'westus2'
+  # Terraform settings
+  terraformWorkingDirectory: '$(System.DefaultWorkingDirectory)/deploy/pipelines'
+  terraformVersion: '1.8.3'
+
+stages:
+  - stage: TerraformContinuousIntegration
+    displayName: Terraform Module - CI
+    jobs:
+    - job: TerraformContinuousIntegrationJob
+      displayName: TerraformContinuousIntegration - CI Job
+      pool:
+        vmImage: ubuntu-20.04
+      steps:
+      #Step 1: run the Checkov Static Code Analysis
+      - bash: $(terraformWorkingDirectory)/checkov.sh $(terraformWorkingDirectory)
+        displayName: Checkov Static Code Analysis
+      #Step 2: install Terraform on the Azure Pipelines agent
+      - task: TerraformInstaller@1
+        displayName: 'Install Terraform'
+        inputs:
+          terraformVersion: $(terraformVersion)
+      # Step 3: run Terraform init to initialize the workspace
+      - task: TerraformCLI@1
+        displayName: 'Run terraform init'
+        inputs:
+          command: init
+          workingDirectory: $(terraformWorkingDirectory)
+      # Step 4: run Terraform validate to validate HCL syntax
+      - task: TerraformCLI@1
+        displayName: 'Run terraform validate'
+        inputs:
+          command: validate
+          workingDirectory: $(terraformWorkingDirectory)
+      # Step 5: run Terraform plan to validate HCL syntax
+      - task: TerraformCLI@1
+        displayName: 'Run terraform plan'
+        inputs:
+          command: plan
+          workingDirectory: $(terraformWorkingDirectory)
+          environmentServiceName: $(serviceConnection)
+          commandOptions: -var location=$(azureLocation)
+      - task: TerraformCLI@1
+        displayName: 'terraform apply'
+        inputs:
+          command: apply
+          workingDirectory: $(terraformWorkingDirectory)
+          environmentServiceName: $(serviceConnection)
