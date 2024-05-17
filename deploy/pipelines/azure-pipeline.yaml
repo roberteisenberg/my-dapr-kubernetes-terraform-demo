@@ -17,7 +17,7 @@ variables:
   serviceConnection: 'my-dapr-kubernetes-terraform-demo'
   azureLocation: 'westus2'
   # Terraform settings
-  terraformWorkingDirectory: '$(System.DefaultWorkingDirectory)/deploy/pipelines'
+  terraformWorkingDirectory: '$(System.DefaultWorkingDirectory)/deploy/terraform'
   terraformVersion: '1.8.3'
 
 stages:
