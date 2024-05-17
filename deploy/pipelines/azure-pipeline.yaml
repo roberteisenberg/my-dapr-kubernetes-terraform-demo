@@ -9,6 +9,9 @@ trigger:
     include:
     - 'deploy/pipelines/*'
 
+pool:
+  vmImage: ubuntu-20.04
+
 variables:
   # There must be an Azure Service Connection with that name defined in your Azure DevOps settings. See https://docs.microsoft.com/en-us/azure/devops/pipelines/library/connect-to-azure?view=azure-devops
   serviceConnection: 'abc'
@@ -18,13 +21,11 @@ variables:
   terraformVersion: '1.8.3'
 
 stages:
-  - stage: TerraformContinuousIntegration
-    displayName: Terraform Module - CI
+  - stage: TerraformValidation
+    displayName: TerraformContinuousIntegration - Validation
     jobs:
-    - job: TerraformContinuousIntegrationJob
-      displayName: TerraformContinuousIntegration - CI Job
-      pool:
-        vmImage: ubuntu-20.04
+    - job: Validate
+      continueOnError: false
       steps:
       #Step 1: run the Checkov Static Code Analysis
       - bash: $(terraformWorkingDirectory)/checkov.sh $(terraformWorkingDirectory)
@@ -46,17 +47,36 @@ stages:
         inputs:
           command: validate
           workingDirectory: $(terraformWorkingDirectory)
-      # Step 5: run Terraform plan to validate HCL syntax
-      - task: TerraformCLI@1
-        displayName: 'Run terraform plan'
-        inputs:
-          command: plan
-          workingDirectory: $(terraformWorkingDirectory)
-          environmentServiceName: $(serviceConnection)
-          commandOptions: -var location=$(azureLocation)
-      - task: TerraformCLI@1
-        displayName: 'terraform apply'
-        inputs:
-          command: apply
-          workingDirectory: $(terraformWorkingDirectory)
-          environmentServiceName: $(serviceConnection)
+  - stage: TerraformDeploy
+    condition: succeeded('TerraformValidation')
+    dependsOn: TerraformValidation
+    displayName: Terraform Module - Validation
+    jobs:
+      - job: apply
+        steps:
+          #Step 1: install Terraform on the Azure Pipelines agent
+          - task: TerraformInstaller@1
+            displayName: 'Install Terraform'
+            inputs:
+              terraformVersion: $(terraformVersion)
+          # Step 2: run Terraform init to initialize the workspace
+          - task: TerraformCLI@1
+            displayName: 'Run terraform init'
+            inputs:
+              command: init
+              workingDirectory: $(terraformWorkingDirectory)
+          # Step 3: run Terraform plan to validate HCL syntax
+          - task: TerraformCLI@1
+            displayName: 'Run terraform plan'
+            inputs:
+              command: plan
+              workingDirectory: $(terraformWorkingDirectory)
+              environmentServiceName: $(serviceConnection)
+              commandOptions: -var location=$(azureLocation)
+          # Step 4: run Terraform to apply
+          - task: TerraformCLI@1
+            displayName: 'terraform apply'
+            inputs:
+              command: apply
+              workingDirectory: $(terraformWorkingDirectory)
+              environmentServiceName: $(serviceConnection)
