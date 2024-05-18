@@ -7,14 +7,14 @@ trigger:
     - '*'
   paths:
     include:
-    - 'deploy/pipelines/*'
+    - 'deploy/terraform/*'
 
 variables:
   # There must be an Azure Service Connection with that name defined in your Azure DevOps settings. See https://docs.microsoft.com/en-us/azure/devops/pipelines/library/connect-to-azure?view=azure-devops
   serviceConnection: 'my-dapr-kubernetes-terraform-demo'
   azureLocation: 'westus2'
   # Terraform settings
-  terraformWorkingDirectory: '$(System.DefaultWorkingDirectory)/deploy/pipelines'
+  terraformWorkingDirectory: '$(System.DefaultWorkingDirectory)/deploy/terraform'
   terraformVersion: '1.8.3'
 
 stages:
