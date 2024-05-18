@@ -72,7 +72,7 @@ stages:
               command: plan
               workingDirectory: $(terraformWorkingDirectory)
               environmentServiceName: $(serviceConnection)
-              commandOptions: westus2
+              commandOptions: 'westus2'
           # Step 4: run Terraform to apply
           - task: TerraformCLI@1
             displayName: 'terraform apply'
