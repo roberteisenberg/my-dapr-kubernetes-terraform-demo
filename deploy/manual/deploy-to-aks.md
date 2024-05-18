@@ -1,3 +1,7 @@
+# this assumes service principal is created and configured.
+# https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-terraform?tabs=bash&pivots=development-environment-azure-cli#authenticate-to-azure-via-a-microsoft-account
+
+dapr uninstall all
 az login
 
 # make sure azure configured properly
@@ -14,10 +18,6 @@ terraform apply main.tfplan
 
 # follow instructions in verify results section
 # https://learn.microsoft.com/en-us/azure/aks/learn/quick-kubernetes-deploy-terraform?tabs=bash&pivots=development-environment-azure-cli#verify-the-results
-
-#create the cluser in azure
-#https://learn.microsoft.com/en-us/azure/aks/dapr?tabs=cli
-
 
 
 # follow remainder of this article after dapr init -kubernetes --wait
