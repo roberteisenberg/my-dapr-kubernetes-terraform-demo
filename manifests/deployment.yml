@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: roberteisenbergmydaprkubernetesterraformdemo 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: roberteisenbergmydaprkubernetesterraformdemo
+  template:
+    metadata:
+      labels:
+        app: roberteisenbergmydaprkubernetesterraformdemo 
+    spec:
+      containers:
+        - name: roberteisenbergmydaprkubernetesterraformdemo 
+          image: containerregistryre.azurecr.io/roberteisenbergmydaprkubernetesterraformdemo
+          ports:
+          - containerPort: 3000
