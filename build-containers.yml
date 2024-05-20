@@ -14,7 +14,7 @@ variables:
   dockerRegistryServiceConnection: '817f408d-3dff-44ec-9a72-7b75a825fb77'
   imageRepository: 'roberteisenbergmydaprkubernetesterraformdemo'
   containerRegistry: 'todelete.azurecr.io'
-  dockerfile: '$(Build.SourcesDirectory)/order_backend/Dockerfile'
+  dockerfilePath: '$(Build.SourcesDirectory)/order_backend/Dockerfile'
   tag: '$(Build.BuildId)'
   imagePullSecret: 'todeleteda68-auth'
 
