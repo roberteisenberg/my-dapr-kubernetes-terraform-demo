@@ -11,7 +11,7 @@ resources:
 variables:
 
   # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '817f408d-3dff-44ec-9a72-7b75a825fb77'
+  dockerRegistryServiceConnection: 'a81ad606-246f-4640-8896-7720068daf6f'
   imageRepository: 'roberteisenbergmydaprkubernetesterraformdemo'
   containerRegistry: 'todelete.azurecr.io'
   dockerfilePath: '$(Build.SourcesDirectory)/order_backend/Dockerfile'
