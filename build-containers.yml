@@ -13,10 +13,10 @@ variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: '817f408d-3dff-44ec-9a72-7b75a825fb77'
   imageRepository: 'roberteisenbergmydaprkubernetesterraformdemo'
-  containerRegistry: 'containerregistryre.azurecr.io'
-  dockerfilePath: '**/Dockerfile'
+  containerRegistry: 'todelete.azurecr.io'
+  dockerfile: '$(Build.SourcesDirectory)/order_backend/Dockerfile'
   tag: '$(Build.BuildId)'
-  imagePullSecret: 'containerregistryreda68-auth'
+  imagePullSecret: 'todeleteda68-auth'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
