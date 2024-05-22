@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderfrontendapp
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "orderfrontendapp"
+        dapr.io/enable-api-logging: "true"
+        dapr.io/config: "tracing"
+    spec:
+      containers:
+      - name: frontend
+        image: containerregistryre.azurecr.io/orderfrontendimage:latest
+      imagePullSecrets:
+      - name: acr-auth-secret

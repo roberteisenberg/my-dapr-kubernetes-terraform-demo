@@ -1,16 +1,3 @@
-# install Redis into cluster
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update
-helm install redis bitnami/redis --set image.tag=6.2
-
-# install dapr
-dapr init --kubernetes --wait
-dapr status -k
-kubectl apply -f ./deploy/k8-dapr/redis.yaml
-kubectl create deployment zipkin --image openzipkin/zipkin
-kubectl expose deployment zipkin --type ClusterIP --port 9411
-kubectl apply -f ./deploy/k8-dapr/zipkin.yaml
-
 ACR_FULL_NAME=containerregistryre.azurecr.io
 ACR_SHORT_NAME=containerregistryre
 az acr update -n $ACR_FULL_NAME --admin-enabled true --resource-group test-minikube-rg
@@ -23,6 +10,21 @@ ACR_PASSWORD=Fxacoa9AuGXQIGJtTpVBIrIcOed408uhx6mhOhlRHo+ACRCUdnR3
 # https://stackoverflow.com/questions/57469214/failed-to-pull-image-unauthorized-authentication-required-imagepullbackoff
 
 kubectl create secret docker-registry acr-auth-secret --docker-server=https://containerregistryre.azurecr.io --docker-username=$ACR_USERNAME --docker-password=$ACR_PASSWORD --docker-email=robert@reaa.onmicrsoft.com
+
+
+# install Redis into cluster
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+helm install redis bitnami/redis --set image.tag=6.2
+
+# install dapr
+dapr init --kubernetes --wait
+dapr status -k
+
+kubectl apply -f ./deploy/k8-dapr/redis.yaml
+kubectl create deployment zipkin --image openzipkin/zipkin
+kubectl expose deployment zipkin --type ClusterIP --port 9411
+kubectl apply -f ./deploy/k8-dapr/zipkin.yaml
 
 <!-- kubectl create secret docker-registry acr-auth-secret \
         --docker-server=$ACR_FULL_NAME \
