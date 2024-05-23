@@ -1,12 +1,13 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: orderbackendapp
+  name: backend-api
   labels:
-    app: backend
+    app: myhellow
+    service: backend
 spec:
   selector:
-    app: backend
+    service: backend
   ports:
   - protocol: TCP
     port: 80
@@ -17,27 +18,29 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: orderbackendapp
+  name: backend
   labels:
-    app: backend
+    app: myhellow
+    service: backend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend
+      service: backend
   template:
     metadata:
       labels:
-        app: backend
+        app: myhellow
+        service: backend
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/app-id: "orderbackendapp"
+        dapr.io/app-id: "backend-api"
         dapr.io/app-port: "3000"
         dapr.io/enable-api-logging: "true"
         dapr.io/config: "tracing"
     spec:
       containers:
-      - name: backend
+      - name: backend-api
         image: containerregistryre.azurecr.io/orderbackendimage:latest
         env:
         - name: APP_PORT

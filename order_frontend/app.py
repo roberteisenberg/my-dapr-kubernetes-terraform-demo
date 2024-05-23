@@ -25,7 +25,7 @@ while True:
 
     try:
         response = requests.post(dapr_url, json=message, timeout=5, headers={
-                                 "dapr-app-id": "orderbackendapp"})
+                                 "dapr-app-id": "myhellow"})
         if not response.ok:
             print("HTTP %d => %s" % (response.status_code,
                                      response.content.decode("utf-8")), flush=True)
