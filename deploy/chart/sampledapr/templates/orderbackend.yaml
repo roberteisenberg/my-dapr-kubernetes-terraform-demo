@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: backend-api
+  name: backendapi
   labels:
     app: myhellow
     service: backend
@@ -9,9 +9,9 @@ spec:
   selector:
     service: backend
   ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 3000
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
   type: LoadBalancer
 
 ---
@@ -34,19 +34,19 @@ spec:
         service: backend
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/app-id: "backend-api"
+        dapr.io/app-id: "backendapi"
         dapr.io/app-port: "3000"
         dapr.io/enable-api-logging: "true"
         dapr.io/config: "tracing"
     spec:
       containers:
-      - name: backend-api
-        image: containerregistryre.azurecr.io/orderbackendimage:latest
-        env:
-        - name: APP_PORT
-          value: "3000"
-        ports:
-        - containerPort: 3000
-        imagePullPolicy: Always
+        - name: backendapi
+          image: containerregistryre.azurecr.io/orderbackendimage:latest
+          env:
+            - name: APP_PORT
+              value: "3000"
+          ports:
+            - containerPort: 3000
+          imagePullPolicy: Always
       imagePullSecrets:
-      - name: acr-auth-secret
+        - name: acr-auth-secret
