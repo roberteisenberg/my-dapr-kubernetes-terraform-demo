@@ -12,6 +12,8 @@
 //
 
 const express = require('express');
+const axios = require('axios');
+const path = require('path');
 const bodyParser = require('body-parser');
 require('isomorphic-fetch');
 
@@ -63,7 +65,17 @@ app.post('/neworder', async (req, res) => {
             throw "Failed to persist state.";
         }
         console.log("Successfully persisted state for Order ID: " + orderId);
+
+        console.log("-------Publishing: ", req.body);
+        const pubsubName = 'pubsub';
+        message = {"messageType":"A","message":"Message on A"}
+
+        pubsubUrl = `http://localhost:${daprPort}/v1.0/publish/${pubsubName}/A`;
+        await axios.post(`${pubsubUrl}`, message);
+        // await axios.post(`${daprUrl}/publish/${pubsubName}/${req.body?.messageType}`, req.body);
+
         res.status(200).send();
+      
     } catch (error) {
         console.log(error);
         res.status(500).send({message: error});

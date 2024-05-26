@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.7.2",
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "isomorphic-fetch": "^2.2.1"
