@@ -1,0 +1,10 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: servicebus-pubsub
+spec:
+  type: pubsub.azure.servicebus.topics
+  version: v1
+  metadata:
+    - name: connectionString # Required when not using Azure Authentication.
+      value: "Endpoint=sb://my-kubernetes-terraform-test.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=CmSdgrdzcZx5grGmJ/A3HSto8EusVc879+ASbBEtZro="

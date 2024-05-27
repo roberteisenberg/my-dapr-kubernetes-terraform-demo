@@ -67,7 +67,7 @@ app.post('/neworder', async (req, res) => {
         console.log("Successfully persisted state for Order ID: " + orderId);
 
         console.log("-------Publishing: ", req.body);
-        const pubsubName = 'pubsub';
+        const pubsubName = 'servicebus-pubsub';
         message = {"messageType":"A","message":"Message on A"}
 
         pubsubUrl = `http://localhost:${daprPort}/v1.0/publish/${pubsubName}/A`;
