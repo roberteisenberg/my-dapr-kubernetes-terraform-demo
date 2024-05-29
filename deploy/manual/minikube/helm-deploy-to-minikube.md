@@ -25,7 +25,6 @@ helm install somename ./sampledapr
 # forward backend and zipkins ports
 kubectl port-forward service/backendapi 8080:80
 kubectl port-forward svc/zipkin 9411:9411
-kubectl port-forward svc/pubsubapi 8081:80
 
 # test the backend service
 curl http://localhost:8080/ports
