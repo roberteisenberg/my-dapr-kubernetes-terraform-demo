@@ -21,12 +21,12 @@ const app = express();
 app.use(bodyParser.json());
 
 // These ports are injected automatically into the container.
-const daprPort = process.env.DAPR_HTTP_PORT ?? "3500"; 
-const daprGRPCPort = process.env.DAPR_GRPC_PORT ?? "50001";
+const daprPort = process.env.DAPR_HTTP_PORT; 
+const daprGRPCPort = process.env.DAPR_GRPC_PORT;
 
 const stateStoreName = process.env.STATE_STORE_NAME ?? "statestore";
 const stateUrl = `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`;
-const port = process.env.APP_PORT ?? "3000";
+const port = process.env.APP_PORT;
 
 app.get('/order', async (_req, res) => {
     try {
