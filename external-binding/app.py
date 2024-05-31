@@ -20,7 +20,6 @@ import os
 
 app = Flask(__name__)
 
-# app_port = '5002'
 app_port = os.getenv('APP_PORT')
 dapr_port = os.getenv('DAPR_HTTP_PORT')
 base_url = os.getenv('BASE_URL', 'http://localhost')
@@ -37,9 +36,38 @@ def process_batch():
 
     print('Processing batch..', flush=True)
 
+    json_file = open("./orders.json", "r")
+    json_array = json.load(json_file)
+
+    for order_line in json_array['orders']:
+        sql_output(order_line)
+
+    json_file.close()
+
     print('Finished processing batch', flush=True)
 
-    return json.dumps({'success': True})
+    return json.dumps({'success': True}), 200, {
+        'ContentType': 'application/json'}
+
+
+def sql_output(order_line):
+
+    sqlCmd = ('insert into orders (orderid, customer, price) values ' +
+              '(%s, \'%s\', %s)' % (order_line['orderid'],
+                                    order_line['customer'],
+                                    order_line['price']))
+    payload = ('{"operation": "exec", "metadata": {"sql" : "%s"} }' % sqlCmd)
+
+    print(sqlCmd, flush=True)
+
+    try:
+        # Insert order using Dapr output binding via HTTP Post
+        resp = requests.post(dapr_url, payload)
+        return resp
+
+    except requests.exceptions.RequestException as e:
+        print(e, flush=True)
+        raise SystemExit(e)
 
 
 app.run(port=app_port)

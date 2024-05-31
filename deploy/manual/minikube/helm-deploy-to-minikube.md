@@ -20,7 +20,7 @@ dapr status -k
 
 # run helm to add services to cluster
 cd deploy/chart
-helm install somename ./sampledapr
+helm install dapr-sample-app ./sampledapr
 
 # forward backend and zipkins ports
 kubectl port-forward service/backendapi 8080:80
