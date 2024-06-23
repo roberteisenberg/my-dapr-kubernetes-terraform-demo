@@ -61,7 +61,7 @@ function create_registry_secret() {
     ACR_FULL_NAME=containerregistryre.azurecr.io
     ACR_SHORT_NAME=containerregistryre
     ACR_USERNAME=$ACR_SHORT_NAME
-    ACR_PASSWORD=Fxacoa9AuGXQIGJtTpVBIrIcOed408uhx6mhOhlRHo+ACRCUdnR3
+    ACR_PASSWORD=foDCxyfogI43r8zB5CnTX+kkTNf16HaJLRVmYdmriQ+ACRBqC1tJ
 
     kubectl create secret docker-registry acr-auth-secret --docker-server=https://containerregistryre.azurecr.io --docker-username=$ACR_USERNAME --docker-password=$ACR_PASSWORD --docker-email=robert@reaa.onmicrsoft.com
 
@@ -138,9 +138,9 @@ enable_add_ons
 enable_ingress_addon
 
 create_registry_secret
+update_helm_repo
 install_redis
 add_helm_repo
-update_helm_repo
 adding_dapr_to_cluster
 update_helm_chart
 printf '======== Done!  ====== \n'
