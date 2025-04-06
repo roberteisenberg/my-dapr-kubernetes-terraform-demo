@@ -2,6 +2,21 @@
 # Build and push image to Azure Container Registry; Deploy to Azure Kubernetes Service
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
+# 🔹 Build Stage:
+# - Uses the Docker@2 task to build and push two Docker images:
+#   - fend (frontend)
+#   - bend (backend)
+# - Pushes them to a Docker registry (originally Azure Container Registry, now updated to Docker Hub).
+
+# 🔹 Deploy Stage:
+# - Uses the KubernetesManifest@0 task to:
+#   - Create an image pull secret in the Kubernetes cluster (so the cluster can pull images from Docker Hub).
+#   - Deploy the app using Kubernetes YAML manifests (deployment.yml, service.yml).
+# - There are two separate deployment strategies:
+#   - Main branch: Deploys to the main AKS environment (roberteisenbergmydaprkubernetesterraformdemo.default).
+#   - Pull requests: Spins up a temporary namespace (like review-app-123) for the PR and deploys the app there — good for preview/testing.
+
+
 trigger:
 - main
 
