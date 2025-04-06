@@ -9,9 +9,18 @@ spec:
   selector:
     service: backend
   ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 3000
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+    - port: 3500
+      targetPort: 3500
+      protocol: TCP
+      name: dapr-http
+    - port: 50001
+      targetPort: 50001
+      protocol: TCP
+      name: dapr-grpc
   type: LoadBalancer
 
 ---
@@ -35,18 +44,15 @@ spec:
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: "backendapi"
-        dapr.io/app-port: "3000"
+        dapr.io/app-port: "80"
         dapr.io/enable-api-logging: "true"
         dapr.io/config: "tracing"
     spec:
       containers:
         - name: backendapi
           image: containerregistryre.azurecr.io/orderbackendimage:latest
-          env:
-            - name: APP_PORT
-              value: "3000"
-          ports:
-            - containerPort: 3000
-          imagePullPolicy: Always
-      imagePullSecrets:
+        imagePullSecrets:
         - name: acr-auth-secret
+          ports:
+            - port: 80
+              protocol: TCP

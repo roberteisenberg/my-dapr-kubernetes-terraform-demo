@@ -107,6 +107,20 @@ function install_redis() {
     done
 }
 
+function install_nginx() {
+    printf '======== Installing bitnami/nginx. Please wait...  ====== \n'
+
+    helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+    # Wait until the installation is complete
+    kubectl get pods | grep "nginx" | grep "1/1" >/dev/null
+    while [ $? -ne 0 ]; do
+        sleep 1
+        printf '======== nginx sleeping...  ====== \n'
+        kubectl get pods | grep "nginx" | grep "1/1" >/dev/null
+    done
+}
+
+
 function adding_dapr_to_cluster() {
     printf '======== Adding dapr to cluster. Please wait...  ====== \n'
     dapr init --kubernetes --wait
@@ -139,7 +153,10 @@ enable_ingress_addon
 
 create_registry_secret
 update_helm_repo
+# install_nginx
 install_redis
+#    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.3/deploy/static/provider/cloud/deploy.yaml
+
 add_helm_repo
 adding_dapr_to_cluster
 update_helm_chart

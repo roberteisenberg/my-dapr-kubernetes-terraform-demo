@@ -15,8 +15,8 @@ import os
 import requests
 import time
 
-dapr_port = os.getenv("DAPR_HTTP_PORT")
-dapr_url = "http://localhost:{}/neworder".format(dapr_port)
+# dapr_port = os.getenv("DAPR_HTTP_PORT")
+# dapr_url = "http://localhost:{}/neworder".format(dapr_port)
 
 n = 0
 while True:
@@ -24,8 +24,11 @@ while True:
     message = {"data": {"orderId": n}}
 
     try:
-        response = requests.post(dapr_url, json=message, timeout=5, headers={
-                                 "dapr-app-id": "backendapi"})
+        # response = requests.post(dapr_url, json=message, timeout=5, headers={
+        #                          "dapr-app-id": "backendapi"})
+
+        print(f"Preparing to send request no {n} to backendapi...")
+        response = requests.get("http://localhost/gateway/ports/", timeout=5)
         if not response.ok:
             print("HTTP %d => %s" % (response.status_code,
                                      response.content.decode("utf-8")), flush=True)

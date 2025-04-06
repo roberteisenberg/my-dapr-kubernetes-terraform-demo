@@ -21,6 +21,10 @@ docker build -t pubsub-python-subscriber .
 docker tag pubsub-python-subscriber containerregistryre.azurecr.io/pubsub-python-subscriber
 docker push containerregistryre.azurecr.io/pubsub-python-subscriber
 
+cd ../envoy-image
+docker build -t envoyimage .
+docker tag envoyimage containerregistryre.azurecr.io/envoyimage
+docker push containerregistryre.azurecr.io/envoyimage
 
 
 

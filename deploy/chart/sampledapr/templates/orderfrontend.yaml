@@ -13,11 +13,11 @@ spec:
     metadata:
       labels:
         app: frontend
-      annotations:
-        dapr.io/enabled: "true"
-        dapr.io/app-id: "orderfrontendapp"
-        dapr.io/enable-api-logging: "true"
-        dapr.io/config: "tracing"
+      # annotations:
+      #   dapr.io/enabled: "true"
+      #   dapr.io/app-id: "orderfrontendapp"
+      #   dapr.io/enable-api-logging: "true"
+      #   dapr.io/config: "tracing"
     spec:
       containers:
       - name: frontend

@@ -24,23 +24,10 @@ app.use(bodyParser.json());
 const daprPort = process.env.DAPR_HTTP_PORT; 
 const daprGRPCPort = process.env.DAPR_GRPC_PORT;
 
-const stateStoreName = process.env.STATE_STORE_NAME ?? "statestore";
-const stateUrl = `http://localhost:${daprPort}/v1.0/state/${stateStoreName}`;
 const port = process.env.APP_PORT;
 
 app.get('/order', async (_req, res) => {
-    try {
-        const response = await fetch(`${stateUrl}/order`);
-        if (!response.ok) {
-            throw "Could not get state.";
-        }
-        const orders = await response.text();
-        res.send(orders);
-    }
-    catch (error) {
-        console.log(error);
-        res.status(500).send({message: error});
-    }
+    return "from /order"
 });
 
 app.post('/neworder', async (req, res) => {
@@ -53,33 +40,9 @@ app.post('/neworder', async (req, res) => {
         value: data
     }];
 
-    try {
-        const response = await fetch(stateUrl, {
-            method: "POST",
-            body: JSON.stringify(state),
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-        if (!response.ok) {
-            throw "Failed to persist state.";
-        }
-        console.log("Successfully persisted state for Order ID: " + orderId);
+    return state
 
-        console.log("-------Publishing: ", req.body);
-        const pubsubName = 'pubsub';
-        message = {"messageType":"A","message":"Message on A"}
-
-        pubsubUrl = `http://localhost:${daprPort}/v1.0/publish/${pubsubName}/A`;
-        await axios.post(`${pubsubUrl}`, message);
-        // await axios.post(`${daprUrl}/publish/${pubsubName}/${req.body?.messageType}`, req.body);
-
-        res.status(200).send();
       
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({message: error});
-    }
 });
 
 app.get('/ports', (_req, res) => {

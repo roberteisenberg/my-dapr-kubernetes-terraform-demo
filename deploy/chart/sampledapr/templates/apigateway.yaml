@@ -1,0 +1,124 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: apigateway-cm
+  namespace: default
+  labels:
+    app: eshop
+    service: apigateway
+data:
+  ASPNETCORE_ENVIRONMENT: Development
+  ASPNETCORE_URLS: http://0.0.0.0:80
+  ENVOY_CATALOG_API_ADDRESS: catalog-api
+  ENVOY_CATALOG_API_PORT: "80"
+  ENVOY_ORDERING_API_ADDRESS: ordering-api
+  ENVOY_ORDERING_API_PORT: "80"
+
+---
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: apigateway
+  namespace: default
+  labels:
+    app: eshop
+    service: apigateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: apigateway
+  template:
+    metadata:
+      labels:
+        app: eshop
+        service: apigateway
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "apigateway"
+        dapr.io/app-port: "80"
+        dapr.io/enable-api-logging: "true"
+        dapr.io/config: "tracing"
+    spec:
+      containers:
+        - name: apigateway
+          image: containerregistryre.azurecr.io/envoyimage:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: admin
+              containerPort: 8001
+              protocol: TCP
+            - name: daprhttp
+              containerPort: 3500
+              protocol: TCP
+            - name: daprgrpc
+              containerPort: 50001
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: apigateway-cm
+      imagePullSecrets:
+        - name: acr-auth-secret
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: apigateway
+  namespace: default
+  labels:
+    app: eshop
+    service: apigateway
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
+    - port: 8001
+      targetPort: 8001
+      protocol: TCP
+      name: admin
+    - port: 3500
+      targetPort: 3500
+      protocol: TCP
+      name: daprhttp
+    - port: 50001
+      targetPort: 50001
+      protocol: TCP
+      name: daprgrpc
+  selector:
+    service: apigateway
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: apigateway-ingress
+  namespace: default
+  labels:
+    app: eshop
+    service: apigateway
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: {{ .Values.hostName }}
+    http:
+      paths: 
+      - path: /gateway(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: apigateway
+            port: 
+              number: 80
