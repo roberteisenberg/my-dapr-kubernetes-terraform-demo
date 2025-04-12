@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: orderfrontendapp
-        image: {{ .Values.orderfrontendapp.image }}
+        image: dapr-traffic-control-python-subscriber:1.0
         ports:
         - containerPort: 3000
       imagePullSecrets:

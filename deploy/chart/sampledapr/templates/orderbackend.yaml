@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: {{ .Values.backend.image }}
+        image: dapr-traffic-control-order-backend:1.0
         ports:
         - containerPort: 80
       imagePullSecrets:

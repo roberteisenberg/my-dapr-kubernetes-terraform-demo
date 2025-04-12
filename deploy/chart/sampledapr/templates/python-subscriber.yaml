@@ -17,6 +17,6 @@ spec:
     spec:
       containers:
       - name: python-subscriber
-        image: {{ .Values.python-subscriber.image }}
+        image: reisenberg123/dapr-traffic-control-python-subscriber:1.0
       imagePullSecrets:
         - name: docker-registry-secret
