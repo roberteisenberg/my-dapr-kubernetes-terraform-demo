@@ -129,6 +129,18 @@ install_redis() {
     done
 }
 
+# Add Dapr to the Minikube cluster
+adding_dapr_to_cluster() {
+    printf '======== Adding dapr to cluster. Please wait...  ====== \n'
+    dapr init --kubernetes --wait
+    # Wait until Dapr is ready
+    dapr status -k | grep "True" >/dev/null
+    while [ $? -ne 0 ]; do
+        sleep 1
+        dapr status -k | grep "True" >/dev/null
+    done
+}
+
 # Apply Dapr components
 apply_dapr_components() {
     printf '======== Applying Dapr components. Please wait...  ====== \n'
@@ -141,24 +153,6 @@ apply_dapr_components() {
         sleep 1
         kubectl get components -n default | grep "kubernetes-secretstore" >/dev/null
     done
-    kubectl get components -n default | grep "statestore" >/dev/null
-    while [ $? -ne 0 ]; do
-        sleep 1
-        kubectl get components -n default | grep "statestore" >/dev/null
-    done
-    kubectl get components -n default | grep "pubsub" >/dev/null
-    while [ $? -ne 0 ]; do
-        sleep 1
-        kubectl get components -n default | grep "pubsub" >/dev/null
-    done
-}
-
-# Apply Dapr components
-apply_dapr_components() {
-    printf '======== Applying Dapr components. Please wait...  ====== \n'
-    kubectl apply -f components/statestore.yaml
-    kubectl apply -f components/pubsub.yaml
-    # Wait until components are applied
     kubectl get components -n default | grep "statestore" >/dev/null
     while [ $? -ne 0 ]; do
         sleep 1
@@ -263,11 +257,11 @@ create_registry_secret
 update_helm_repo
 install_redis
 add_helm_repo
-adding_dapr_to_cluster
-apply_dapr_components  # Add Dapr components
+adding_dapr_to_cluster  # Ensure this is called
+apply_dapr_components
 update_helm_chart
-port_forward_and_test  # Add port forwarding and testing
-observe_logs          # Add log inspection
+port_forward_and_test
+observe_logs
 
 # Uncomment the following line if you want to clean up after testing
 # cleanup
