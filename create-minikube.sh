@@ -4,9 +4,9 @@
 # This script automates the process of setting up a Kubernetes 
 # environment using Minikube, enabling necessary addons, 
 # creating registry secrets, adding Helm repositories, 
-# installing Redis, Nginx, and Dapr, and deploying a sample 
-# Dapr application. It also performs cleanup by uninstalling 
-# Minikube and Dapr at the end of the process.
+# installing Redis and Dapr, deploying a sample Dapr application,
+# testing the deployment, and inspecting logs. It also includes
+# optional cleanup at the end of the process.
 # ============================================================
 
 # Function to display a spinner during long-running operations
@@ -47,7 +47,7 @@ create_minikube_cluster() {
 
 # Enable the dashboard addon in Minikube
 enable_add_ons() {
-    printf '======== Enabling dashboardaddon. Please wait...  ====== \n'
+    printf '======== Enabling dashboard addon. Please wait...  ====== \n'
     minikube addons enable dashboard
 
     # Wait until the addon is enabled
@@ -129,24 +129,34 @@ install_redis() {
     done
 }
 
-# Install Nginx using Bitnami Helm chart
-install_nginx() {
-    printf '======== Installing bitnami/nginx. Please wait...  ====== \n'
-
-    helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-    # Wait until the installation is complete
-    kubectl get pods | grep "nginx" | grep "1/1" >/dev/null
-    while [ $? -ne 0 ]; do
-        sleep 1
-        printf '======== nginx sleeping...  ====== \n'
-        kubectl get pods | grep "nginx" | grep "1/1" >/dev/null
-    done
-}
-
 # Add Dapr to the Minikube cluster
 adding_dapr_to_cluster() {
     printf '======== Adding dapr to cluster. Please wait...  ====== \n'
     dapr init --kubernetes --wait
+    # Wait until Dapr is ready
+    dapr status -k | grep "True" >/dev/null
+    while [ $? -ne 0 ]; do
+        sleep 1
+        dapr status -k | grep "True" >/dev/null
+    done
+}
+
+# Apply Dapr components
+apply_dapr_components() {
+    printf '======== Applying Dapr components. Please wait...  ====== \n'
+    kubectl apply -f components/statestore.yaml
+    kubectl apply -f components/pubsub.yaml
+    # Wait until components are applied
+    kubectl get components -n default | grep "statestore" >/dev/null
+    while [ $? -ne 0 ]; do
+        sleep 1
+        kubectl get components -n default | grep "statestore" >/dev/null
+    done
+    kubectl get components -n default | grep "pubsub" >/dev/null
+    while [ $? -ne 0 ]; do
+        sleep 1
+        kubectl get components -n default | grep "pubsub" >/dev/null
+    done
 }
 
 # Deploy a sample Dapr application using Helm chart
@@ -154,32 +164,100 @@ update_helm_chart(){
     printf '======== Deploying helm dapr-sample-app chart. Please wait...  ====== \n'
     cd deploy/chart
     helm install dapr-sample-app ./sampledapr
-    # Wait until the installation is complete (commented out for now)
-    # kubectl get pods | grep "dapr-sample-app" | grep "1/1" >/dev/null
-    # while [ $? -ne 0 ]; do
-    #     sleep 1
-    #     kubectl get pods | grep "dapr-sample-app" | grep "1/1" >/dev/null
-    # done
-
+    # Wait until the deployment is complete
+    kubectl get pods | grep "backend" | grep "2/2" >/dev/null
+    while [ $? -ne 0 ]; do
+        sleep 1
+        kubectl get pods | grep "backend" | grep "2/2" >/dev/null
+    done
+    kubectl get pods | grep "orderfrontendapp" | grep "2/2" >/dev/null
+    while [ $? -ne 0 ]; do
+        sleep 1
+        kubectl get pods | grep "orderfrontendapp" | grep "2/2" >/dev/null
+    done
+    kubectl get pods | grep "python-subscriber" | grep "2/2" >/dev/null
+    while [ $? -ne 0 ]; do
+        sleep 1
+        kubectl get pods | grep "python-subscriber" | grep "2/2" >/dev/null
+    done
     cd ../..
 }
 
-# Clean up the environment by uninstalling Minikube and Dapr
-printf '======== Uninstalling minikube and dapr. Please wait...  ====== \n'
+# Wait for services and port-forward
+port_forward_and_test() {
+    printf '======== Waiting for services and setting up port forwarding...  ====== \n'
+
+    # Wait for backendapi and zipkin services to be ready
+    echo "Waiting for backendapi service..."
+    until kubectl get service backendapi --output=jsonpath='{.spec.ports}' >/dev/null 2>&1; do
+        sleep 2
+    done
+    echo "Waiting for zipkin service..."
+    until kubectl get service zipkin --output=jsonpath='{.spec.ports}' >/dev/null 2>&1; do
+        sleep 2
+    done
+
+    # Check if services exist before port forwarding
+    kubectl get service backendapi || { echo "Error: backendapi service not found"; exit 1; }
+    kubectl get service zipkin || { echo "Error: zipkin service not found"; exit 1; }
+
+    # Forward backend and Zipkin ports
+    kubectl port-forward service/backendapi 8080:80 &
+    PORT_FORWARD_PID1=$!
+    kubectl port-forward svc/zipkin 9411:9411 &
+    PORT_FORWARD_PID2=$!
+
+    # Test the backend service
+    printf '======== Testing backend service...  ====== \n'
+    sleep 2  # Give port forwarding a moment to establish
+    curl http://localhost:8080/ports || echo "Warning: /ports endpoint failed"
+    curl --request POST --data "@deploy/sample.json" --header Content-Type:application/json http://localhost:8080/neworder
+    sleep 2  # Wait for the backend to process the order
+    curl http://localhost:8080/order
+
+    # Expected output
+    printf 'Expected output: { "orderId": "42" }\n'
+
+    # Clean up port forwarding
+    kill $PORT_FORWARD_PID1 $PORT_FORWARD_PID2
+}
+
+# Observe logs
+observe_logs() {
+    printf '======== Observing logs...  ====== \n'
+    kubectl logs --selector=app=backend -c backend --tail=-1
+    kubectl logs --selector=app=backend -c daprd --tail=-1
+    kubectl logs --selector=app=frontend -c daprd --tail=-1
+}
+
+# Clean up the environment (commented out for testing)
+cleanup() {
+    printf '======== Uninstalling minikube and dapr. Please wait...  ====== \n'
+    minikube delete
+    dapr uninstall all
+    docker context use default
+}
+
+# Execute the functions to set up the environment
+printf '======== Cleaning up previous instances...  ====== \n'
 minikube delete
 dapr uninstall all
 docker context use default
 
-# Execute the functions to set up the environment
 create_minikube_cluster
 enable_add_ons
 enable_ingress_addon
 create_registry_secret
 update_helm_repo
-# install_nginx  # Commented out for now
 install_redis
 add_helm_repo
 adding_dapr_to_cluster
+apply_dapr_components  # Add Dapr components
 update_helm_chart
+port_forward_and_test  # Add port forwarding and testing
+observe_logs          # Add log inspection
+
+# Uncomment the following line if you want to clean up after testing
+# cleanup
 
 printf '======== Done!  ====== \n'
