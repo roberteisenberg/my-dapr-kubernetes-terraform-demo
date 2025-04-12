@@ -141,51 +141,49 @@ adding_dapr_to_cluster() {
     done
 }
 
-# Apply Dapr components
-apply_dapr_components() {
-    printf '======== Applying Dapr components. Please wait...  ====== \n'
-    kubectl apply -f components/secretstore.yaml
-    kubectl apply -f components/statestore.yaml
-    kubectl apply -f components/pubsub.yaml
-    # Wait until components are applied
-    kubectl get components -n default | grep "kubernetes-secretstore" >/dev/null
-    while [ $? -ne 0 ]; do
-        sleep 1
-        kubectl get components -n default | grep "kubernetes-secretstore" >/dev/null
-    done
-    kubectl get components -n default | grep "statestore" >/dev/null
-    while [ $? -ne 0 ]; do
-        sleep 1
-        kubectl get components -n default | grep "statestore" >/dev/null
-    done
-    kubectl get components -n default | grep "pubsub" >/dev/null
-    while [ $? -ne 0 ]; do
-        sleep 1
-        kubectl get components -n default | grep "pubsub" >/dev/null
-    done
-}
-
 # Deploy a sample Dapr application using Helm chart
 update_helm_chart(){
     printf '======== Deploying helm dapr-sample-app chart. Please wait...  ====== \n'
     cd deploy/chart
     helm install dapr-sample-app ./sampledapr
-    # Wait until the deployment is complete
-    kubectl get pods | grep "backend" | grep "2/2" >/dev/null
-    while [ $? -ne 0 ]; do
-        sleep 1
-        kubectl get pods | grep "backend" | grep "2/2" >/dev/null
+
+    # Wait for pods to be ready, with a timeout
+    echo "Waiting for backend pod to be ready..."
+    for i in {1..60}; do  # Timeout after 120 seconds (60 * 2s)
+        if kubectl get pods | grep "backend" | grep "2/2" >/dev/null; then
+            break
+        fi
+        sleep 2
     done
-    kubectl get pods | grep "orderfrontendapp" | grep "2/2" >/dev/null
-    while [ $? -ne 0 ]; do
-        sleep 1
-        kubectl get pods | grep "orderfrontendapp" | grep "2/2" >/dev/null
+    if ! kubectl get pods | grep "backend" | grep "2/2" >/dev/null; then
+        echo "Warning: backend pod not ready after 120 seconds"
+        kubectl get pods | grep "backend"
+    fi
+
+    echo "Waiting for orderfrontendapp pod to be ready..."
+    for i in {1..60}; do
+        if kubectl get pods | grep "orderfrontendapp" | grep "2/2" >/dev/null; then
+            break
+        fi
+        sleep 2
     done
-    kubectl get pods | grep "python-subscriber" | grep "2/2" >/dev/null
-    while [ $? -ne 0 ]; do
-        sleep 1
-        kubectl get pods | grep "python-subscriber" | grep "2/2" >/dev/null
+    if ! kubectl get pods | grep "orderfrontendapp" | grep "2/2" >/dev/null; then
+        echo "Warning: orderfrontendapp pod not ready after 120 seconds"
+        kubectl get pods | grep "orderfrontendapp"
+    fi
+
+    echo "Waiting for python-subscriber pod to be ready..."
+    for i in {1..60}; do
+        if kubectl get pods | grep "python-subscriber" | grep "2/2" >/dev/null; then
+            break
+        fi
+        sleep 2
     done
+    if ! kubectl get pods | grep "python-subscriber" | grep "2/2" >/dev/null; then
+        echo "Warning: python-subscriber pod not ready after 120 seconds"
+        kubectl get pods | grep "python-subscriber"
+    fi
+
     cd ../..
 }
 
@@ -257,8 +255,7 @@ create_registry_secret
 update_helm_repo
 install_redis
 add_helm_repo
-adding_dapr_to_cluster  # Ensure this is called
-apply_dapr_components
+adding_dapr_to_cluster
 update_helm_chart
 port_forward_and_test
 observe_logs
