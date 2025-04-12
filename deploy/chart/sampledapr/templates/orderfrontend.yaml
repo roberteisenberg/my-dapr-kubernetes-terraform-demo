@@ -1,3 +1,18 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: orderfrontendapp
+  labels:
+    app: orderfrontendapp
+spec:
+  selector:
+    app: orderfrontendapp
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

@@ -7,13 +7,12 @@ metadata:
     service: backend
 spec:
   selector:
-    service: backend
+    app: backend
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 3000
+      targetPort: 80
   type: LoadBalancer
-
 ---
 apiVersion: apps/v1
 kind: Deployment
