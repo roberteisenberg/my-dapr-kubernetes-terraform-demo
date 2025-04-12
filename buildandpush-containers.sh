@@ -1,26 +1,42 @@
-az login
-az acr login --name containerregistryre
+# 🔹 Build and Push Docker Images to Docker Hub:
+# - The following commands build and push Docker images for different services.
+# - Docker Hub is used as the container registry.
+# - Services include:
+#   - external-binding-sample
+#   - orderbackendimage
+#   - orderfrontendimage
+#   - pubsub-python-subscriber
+#   - envoyimage
+
+# 🔹 Commands:
+# - Docker build for each service.
+# - Docker tag with Docker Hub registry.
+# - Docker push to Docker Hub.
+
+# Ensure you're logged into Docker Hub
+docker login --username reisenberg123 --password Pr@gProg55
 
 cd external-binding
 docker build -t external-binding-sample .
-docker tag external-binding-sample containerregistryre.azurecr.io/external-binding-sample
-docker push containerregistryre.azurecr.io/external-binding-sample
+docker tag external-binding-sample reisenberg123/external-binding-sample
+docker push reisenberg123/external-binding-sample
 
 cd ../order_backend
 docker build -t orderbackendimage .
-docker tag orderbackendimage containerregistryre.azurecr.io/orderbackendimage
-docker push containerregistryre.azurecr.io/orderbackendimage
+docker tag orderbackendimage reisenberg123/orderbackendimage
+docker push reisenberg123/orderbackendimage
 
 cd ../order_frontend
 docker build -t orderfrontendimage .
-docker tag orderfrontendimage containerregistryre.azurecr.io/orderfrontendimage
-docker push containerregistryre.azurecr.io/orderfrontendimage
+docker tag orderfrontendimage reisenberg123/orderfrontendimage
+docker push reisenberg123/orderfrontendimage
 
 cd ../python-subscriber
 docker build -t pubsub-python-subscriber .
-docker tag pubsub-python-subscriber containerregistryre.azurecr.io/pubsub-python-subscriber
-docker push containerregistryre.azurecr.io/pubsub-python-subscriber
+docker tag pubsub-python-subscriber reisenberg123/pubsub-python-subscriber
+docker push reisenberg123/pubsub-python-subscriber
 
-
-
-
+cd ../envoy-image
+docker build -t envoyimage .
+docker tag envoyimage reisenberg123/envoyimage
+docker push reisenberg123/envoyimage
