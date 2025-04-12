@@ -129,15 +129,27 @@ install_redis() {
     done
 }
 
-# Add Dapr to the Minikube cluster
-adding_dapr_to_cluster() {
-    printf '======== Adding dapr to cluster. Please wait...  ====== \n'
-    dapr init --kubernetes --wait
-    # Wait until Dapr is ready
-    dapr status -k | grep "True" >/dev/null
+# Apply Dapr components
+apply_dapr_components() {
+    printf '======== Applying Dapr components. Please wait...  ====== \n'
+    kubectl apply -f components/secretstore.yaml
+    kubectl apply -f components/statestore.yaml
+    kubectl apply -f components/pubsub.yaml
+    # Wait until components are applied
+    kubectl get components -n default | grep "kubernetes-secretstore" >/dev/null
     while [ $? -ne 0 ]; do
         sleep 1
-        dapr status -k | grep "True" >/dev/null
+        kubectl get components -n default | grep "kubernetes-secretstore" >/dev/null
+    done
+    kubectl get components -n default | grep "statestore" >/dev/null
+    while [ $? -ne 0 ]; do
+        sleep 1
+        kubectl get components -n default | grep "statestore" >/dev/null
+    done
+    kubectl get components -n default | grep "pubsub" >/dev/null
+    while [ $? -ne 0 ]; do
+        sleep 1
+        kubectl get components -n default | grep "pubsub" >/dev/null
     done
 }
 
