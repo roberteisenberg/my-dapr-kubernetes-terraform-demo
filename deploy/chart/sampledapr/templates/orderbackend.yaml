@@ -34,7 +34,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: dapr-traffic-control-order-backend:1.0
+        image: reisenberg123/dapr-traffic-control-order-backend:1.0
         ports:
         - containerPort: 80
       imagePullSecrets:

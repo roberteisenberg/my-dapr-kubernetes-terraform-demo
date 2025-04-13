@@ -29,12 +29,13 @@ spec:
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: "orderfrontendapp"
-        dapr.io/app-port: "3000"
+        dapr.io/app-port: "80"
+        dapr.io/metrics-enabled: "true"
     spec:
       containers:
       - name: orderfrontendapp
-        image: dapr-traffic-control-python-subscriber:1.0
+        image: reisenberg123/dapr-traffic-control-order-frontend:1.0
         ports:
-        - containerPort: 3000
+        - containerPort: 80
       imagePullSecrets:
         - name: docker-registry-secret
