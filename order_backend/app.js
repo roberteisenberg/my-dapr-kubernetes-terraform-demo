@@ -88,4 +88,4 @@ app.get('/ports', (_req, res) => {
     res.status(200).send({DAPR_HTTP_PORT: daprPort, DAPR_GRPC_PORT: daprGRPCPort })
 });
 
-app.listen(port, () => console.log(`Node App listening on port ${port}!`));
+app.listen(port, () => console.log(`Cort ${port}!`));

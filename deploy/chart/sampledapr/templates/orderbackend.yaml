@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: backend
   labels:
-    app: myhellow  # Updated from 'backend' to match the Service
+    app: myhellow
     service: backend
 spec:
   replicas: 1
@@ -26,14 +26,14 @@ spec:
         ports:
         - containerPort: 80
         env:
+        - name: APP_PORT
+          value: "80"
         - name: DAPR_HTTP_PORT
           value: "3500"
         - name: DAPR_GRPC_PORT
           value: "50001"
         - name: APP_PROTOCOL
           value: "http"
-        - name: PORT
-          value: "80"
         readinessProbe:
           httpGet:
             path: /ports
@@ -50,14 +50,26 @@ spec:
           timeoutSeconds: 5
       - name: daprd
         image: ghcr.io/dapr/daprd:1.15.4
+        command: ["/daprd"]
+        args:
+        - "--app-id"
+        - "backendapi"
+        - "--app-port"
+        - "80"
+        - "--dapr-http-port"
+        - "3500"
+        - "--dapr-grpc-port"
+        - "50001"
+        - "--metrics-port"
+        - "9090"
+        - "--log-level"
+        - "info"
         readinessProbe:
           httpGet:
             path: /v1.0/healthz
-            port: 3501
+            port: 3500
           initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 5
-          successThreshold: 1
-          failureThreshold: 3
       imagePullSecrets:
       - name: docker-registry-secret

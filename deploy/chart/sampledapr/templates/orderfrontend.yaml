@@ -1,22 +1,9 @@
-kind: Service
-apiVersion: v1
-metadata:
-  name: orderfrontendapp
-  labels:
-    app: orderfrontendapp
-spec:
-  selector:
-    app: orderfrontendapp
-  ports:
-    - protocol: TCP
-      port: 3000
-      targetPort: 3000
-  type: ClusterIP
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: orderfrontendapp
+  labels:
+    app: orderfrontendapp
 spec:
   replicas: 1
   selector:
@@ -34,8 +21,54 @@ spec:
     spec:
       containers:
       - name: orderfrontendapp
-        image: reisenberg123/dapr-traffic-control-order-frontend:1.0
+        image: reisenberg123/dapr-traffic-control-order-frontend:1.0  # Confirm correct image
         ports:
         - containerPort: 80
+        env:
+        - name: APP_PORT
+          value: "80"
+        - name: DAPR_HTTP_PORT
+          value: "3500"
+        - name: DAPR_GRPC_PORT
+          value: "50001"
+        - name: APP_PROTOCOL
+          value: "http"
+        readinessProbe:
+          httpGet:
+            path: /health  # Adjust to app’s actual health endpoint
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health  # Adjust to app’s actual health endpoint
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+      - name: daprd
+        image: ghcr.io/dapr/daprd:1.15.4
+        command: ["/daprd"]
+        args:
+        - "--app-id"
+        - "orderfrontendapp"
+        - "--app-port"
+        - "80"
+        - "--dapr-http-port"
+        - "3500"
+        - "--dapr-grpc-port"
+        - "50001"
+        - "--metrics-port"
+        - "9090"
+        - "--log-level"
+        - "info"
+        readinessProbe:
+          httpGet:
+            path: /v1.0/healthz
+            port: 3500
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
       imagePullSecrets:
-        - name: docker-registry-secret
+      - name: docker-registry-secret
