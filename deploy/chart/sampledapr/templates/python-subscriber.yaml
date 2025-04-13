@@ -67,7 +67,7 @@ spec:
         - "--app-protocol"
         - "http"
         - "--log-level"
-        - "info"
+        - "debug"
         - "--dapr-graceful-shutdown-seconds"
         - "-1"
         - "--mode"
@@ -81,7 +81,6 @@ spec:
         - "9090"
         - "--placement-host-address"
         - "dapr-placement-server.dapr-system.svc.cluster.local:50005"
-        - "--enable-mtls"
         env:
         - name: NAMESPACE
           value: "default"
