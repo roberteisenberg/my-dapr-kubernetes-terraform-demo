@@ -1,23 +1,10 @@
-kind: Service
-apiVersion: v1
-metadata:
-  name: backendapi
-  labels:
-    app: myhellow
-    service: backend
-spec:
-  selector:
-    app: backend
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
-  type: LoadBalancer
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
+  labels:
+    app: myhellow  # Updated from 'backend' to match the Service
+    service: backend
 spec:
   replicas: 1
   selector:
@@ -31,11 +18,46 @@ spec:
         dapr.io/enabled: "true"
         dapr.io/app-id: "backendapi"
         dapr.io/app-port: "80"
+        dapr.io/metrics-enabled: "true"
     spec:
       containers:
       - name: backend
         image: reisenberg123/dapr-traffic-control-order-backend:1.0
         ports:
         - containerPort: 80
+        env:
+        - name: DAPR_HTTP_PORT
+          value: "3500"
+        - name: DAPR_GRPC_PORT
+          value: "50001"
+        - name: APP_PROTOCOL
+          value: "http"
+        - name: PORT
+          value: "80"
+        readinessProbe:
+          httpGet:
+            path: /ports
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /ports
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+      - name: daprd
+        image: ghcr.io/dapr/daprd:1.15.4
+        readinessProbe:
+          httpGet:
+            path: /v1.0/healthz
+            port: 3501
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
       imagePullSecrets:
-        - name: docker-registry-secret
+      - name: docker-registry-secret
