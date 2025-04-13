@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: python-subscriber
+  labels:
+    app: python-subscriber
 spec:
   replicas: 1
   selector:
@@ -14,9 +16,121 @@ spec:
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: "python-subscriber"
+        dapr.io/app-port: "5001"  # Match Flask app port
+        dapr.io/app-protocol: "http"
+        dapr.io/metrics-enabled: "true"
     spec:
       containers:
       - name: python-subscriber
         image: reisenberg123/dapr-traffic-control-python-subscriber:1.0
+        ports:
+        - containerPort: 5001  # Match Flask app port
+        env:
+        - name: DAPR_HTTP_PORT
+          value: "3500"
+        - name: DAPR_GRPC_PORT
+          value: "50001"
+        - name: APP_PROTOCOL
+          value: "http"
+        readinessProbe:
+          httpGet:
+            path: /health  # Adjust if the app has a health endpoint
+            port: 5001
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health  # Adjust if the app has a health endpoint
+            port: 5001
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+      - name: daprd
+        image: ghcr.io/dapr/daprd:1.15.4
+        command: ["/daprd"]
+        args:
+        - "--dapr-http-port"
+        - "3500"
+        - "--dapr-grpc-port"
+        - "50001"
+        - "--dapr-internal-grpc-port"
+        - "50002"
+        - "--dapr-listen-addresses"
+        - "[::1],127.0.0.1"
+        - "--dapr-public-port"
+        - "3501"
+        - "--app-id"
+        - "python-subscriber"
+        - "--app-port"
+        - "5001"  # Match Flask app port
+        - "--app-protocol"
+        - "http"
+        - "--log-level"
+        - "info"
+        - "--dapr-graceful-shutdown-seconds"
+        - "-1"
+        - "--mode"
+        - "kubernetes"
+        - "--control-plane-address"
+        - "dapr-api.dapr-system.svc.cluster.local:443"
+        - "--sentry-address"
+        - "dapr-sentry.dapr-system.svc.cluster.local:443"
+        - "--enable-metrics"
+        - "--metrics-port"
+        - "9090"
+        - "--placement-host-address"
+        - "dapr-placement-server.dapr-system.svc.cluster.local:50005"
+        - "--enable-mtls"
+        env:
+        - name: NAMESPACE
+          value: "default"
+        - name: DAPR_TRUST_ANCHORS
+          value: |
+            -----BEGIN CERTIFICATE-----
+            MIIBcDCCARegAwIBAgIRAPAEhAQq2j4sPFPmfGNH5AkwCgYIKoZIzj0EAwIwGDEW
+            MBQGA1UEChMNY2x1c3Rlci5sb2NhbDAeFw0yNTA0MTMwNzI3MTBaFw0yNjA0MTMw
+            NzQyMTBaMBgxFjAUBgNVBAoTDWNsdXN0ZXIubG9jYWwwWTATBgcqhkjOPQIBBggq
+            hkjOPQMBBwNCAASEZVG7D77ZAGJb7Tif4XcRuPRm6B2EOfk8RAgiLIqb+WoN6J0b
+            Ooo/p+p4TuX51Ha8AOx2h23pVxJ+RBaM9VvLo0IwQDAOBgNVHQ8BAf8EBAMCAqQw
+            DwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUCfw3maNguTgbeJQcclVtHrACMrQw
+            CgYIKoZIzj0EAwIDRwAwRAIgdyVvOidTdkFLdfvgJVuh8N6UC1gXLgGrSLKlL4hl
+            NrsCIB+qaP8+1pfyUnmeLgiG8VwWCUMWe3gn/ZWUAZPRSUbk
+            -----END CERTIFICATE-----
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: DAPR_CONTROLPLANE_NAMESPACE
+          value: "dapr-system"
+        - name: DAPR_CONTROLPLANE_TRUST_DOMAIN
+          value: "cluster.local"
+        - name: DAPR_SCHEDULER_HOST_ADDRESS
+          value: "dapr-scheduler-server-0.dapr-scheduler-server.dapr-system.svc.cluster.local:50006,dapr-scheduler-server-1.dapr-scheduler-server.dapr-system.svc.cluster.local:50006,dapr-scheduler-server-2.dapr-scheduler-server.dapr-system.svc.cluster.local:50006"
+        - name: DAPR_SCHEDULER_HOST_ADDRESS_DNS_A
+          value: "dapr-scheduler-server-a.dapr-system.svc.cluster.local:443"
+        readinessProbe:
+          httpGet:
+            path: /v1.0/healthz
+            port: 3501
+          initialDelaySeconds: 3
+          periodSeconds: 6
+          timeoutSeconds: 3
+        livenessProbe:
+          tcpSocket:
+            port: 3501
+          initialDelaySeconds: 3
+          periodSeconds: 6
+          timeoutSeconds: 3
+        volumeMounts:
+        - name: dapr-identity-token
+          mountPath: "/var/run/secrets/dapr.io/sentrytoken"
+      volumes:
+      - name: dapr-identity-token
+        projected:
+          sources:
+          - serviceAccountToken:
+              path: dapr.io/sentrytoken
+              expirationSeconds: 7200
       imagePullSecrets:
-        - name: docker-registry-secret
+      - name: docker-registry-secret
