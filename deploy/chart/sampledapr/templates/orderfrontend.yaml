@@ -1,0 +1,40 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: orderfrontendapp
+  labels:
+    app: orderfrontendapp
+spec:
+  selector:
+    app: orderfrontendapp
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orderfrontendapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orderfrontendapp
+  template:
+    metadata:
+      labels:
+        app: orderfrontendapp
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "orderfrontendapp"
+        dapr.io/app-port: "3000"
+    spec:
+      containers:
+      - name: orderfrontendapp
+        image: dapr-traffic-control-python-subscriber:1.0
+        ports:
+        - containerPort: 3000
+      imagePullSecrets:
+        - name: docker-registry-secret

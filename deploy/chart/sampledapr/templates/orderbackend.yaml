@@ -1,0 +1,41 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: backendapi
+  labels:
+    app: myhellow
+    service: backend
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "backendapi"
+        dapr.io/app-port: "80"
+    spec:
+      containers:
+      - name: backend
+        image: dapr-traffic-control-order-backend:1.0
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+        - name: docker-registry-secret

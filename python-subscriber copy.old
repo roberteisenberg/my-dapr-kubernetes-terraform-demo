@@ -1,0 +1,52 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: pubsubapi
+  labels:
+    app: myhellow
+    service: pubsub
+spec:
+  selector:
+    service: pubsub
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5001
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pubsub
+  labels:
+    app: myhellow
+    service: pubsub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: pubsub
+  template:
+    metadata:
+      labels:
+        app: myhellow
+        service: pubsub
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "pubsubapi"
+        dapr.io/app-port: "5001"
+        dapr.io/enable-api-logging: "true"
+        dapr.io/config: "tracing"
+    spec:
+      containers:
+      - name: pubsubapi
+        image: containerregistryre.azurecr.io/pubsub-python-subscriber:latest
+          env:
+            - name: APP_PORT
+              value: "5001"
+        ports:
+        - containerPort: 5001
+        imagePullPolicy: Always
+      imagePullSecrets:
+      - name: acr-auth-secret
