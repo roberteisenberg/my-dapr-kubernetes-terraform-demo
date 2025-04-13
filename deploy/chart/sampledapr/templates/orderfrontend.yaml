@@ -36,14 +36,14 @@ spec:
           value: "http"
         readinessProbe:
           httpGet:
-            path: /health  # Adjust to app’s actual health endpoint
+            path: /health
             port: 80
           initialDelaySeconds: 5
           periodSeconds: 10
           timeoutSeconds: 5
         livenessProbe:
           httpGet:
-            path: /health  # Adjust to app’s actual health endpoint
+            path: /health
             port: 80
           initialDelaySeconds: 15
           periodSeconds: 10
@@ -66,6 +66,43 @@ spec:
         - "9090"
         - "--log-level"
         - "info"
+        - "--mode"
+        - "kubernetes"
+        - "--control-plane-address"
+        - "dapr-api.dapr-system.svc.cluster.local:443"
+        - "--sentry-address"
+        - "dapr-sentry.dapr-system.svc.cluster.local:443"
+        - "--enable-metrics"
+        - "--placement-host-address"
+        - "dapr-placement-server.dapr-system.svc.cluster.local:50005"
+        - "--enable-mtls"
+        env:
+        - name: NAMESPACE
+          value: "default"
+        - name: DAPR_TRUST_ANCHORS
+          value: |
+            -----BEGIN CERTIFICATE-----
+            MIIBcDCCARegAwIBAgIRAPAEhAQq2j4sPFPmfGNH5AkwCgYIKoZIzj0EAwIwGDEW
+            MBQGA1UEChMNY2x1c3Rlci5sb2NhbDAeFw0yNTA0MTMwNzI3MTBaFw0yNjA0MTMw
+            NzQyMTBaMBgxFjAUBgNVBAoTDWNsdXN0ZXIubG9jYWwwWTATBgcqhkjOPQIBBggq
+            hkjOPQMBBwNCAASEZVG7D77ZAGJb7Tif4XcRuPRm6B2EOfk8RAgiLIqb+WoN6J0b
+            Ooo/p+p4TuX51Ha8AOx2h23pVxJ+RBaM9VvLo0IwQDAOBgNVHQ8BAf8EBAMCAqQw
+            DwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUCfw3maNguTgbeJQcclVtHrACMrQw
+            CgYIKoZIzj0EAwIDRwAwRAIgdyVvOidTdkFLdfvgJVuh8N6UC1gXLgGrSLKlL4hl
+            NrsCIB+qaP8+1pfyUnmeLgiG8VwWCUMWe3gn/ZWUAZPRSUbk
+            -----END CERTIFICATE-----
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: DAPR_CONTROLPLANE_NAMESPACE
+          value: "dapr-system"
+        - name: DAPR_CONTROLPLANE_TRUST_DOMAIN
+          value: "cluster.local"
+        - name: DAPR_SCHEDULER_HOST_ADDRESS
+          value: "dapr-scheduler-server-0.dapr-scheduler-server.dapr-system.svc.cluster.local:50006,dapr-scheduler-server-1.dapr-scheduler-server.dapr-system.svc.cluster.local:50006,dapr-scheduler-server-2.dapr-scheduler-server.dapr-system.svc.cluster.local:50006"
+        - name: DAPR_SCHEDULER_HOST_ADDRESS_DNS_A
+          value: "dapr-scheduler-server-a.dapr-system.svc.cluster.local:443"
         readinessProbe:
           httpGet:
             path: /v1.0/healthz

@@ -11,25 +11,41 @@
 # limitations under the License.
 #
 
-import os
+from flask import Flask, jsonify
 import requests
-import time
+import urllib3
+import json
+import random
+import os
 
-dapr_port = os.getenv("DAPR_HTTP_PORT")
-dapr_url = "http://localhost:{}/neworder".format(dapr_port)
+app = Flask(__name__)
 
-n = 0
-while True:
-    n += 1
-    message = {"data": {"orderId": n}}
+daprPort = os.getenv("DAPR_HTTP_PORT", 3500)
 
-    try:
-        response = requests.post(dapr_url, json=message, timeout=5, headers={
-                                 "dapr-app-id": "backendapi"})
-        if not response.ok:
-            print("HTTP %d => %s" % (response.status_code,
-                                     response.content.decode("utf-8")), flush=True)
-    except Exception as e:
-        print(e, flush=True)
+@app.route('/')
+def index():
+    with urllib3.PoolManager() as http:
+        r = http.request('GET', f'http://localhost:{daprPort}/order', headers={"dapr-app-id": "backendapi"})
+        return jsonify(json.loads(r.data.decode('utf-8')))
 
-    time.sleep(1)
+@app.route('/neworder')
+def neworder():
+    with urllib3.PoolManager() as http:
+        r = http.request(
+            'POST',
+            f'http://localhost:{daprPort}/neworder',
+            headers={'Content-Type': 'application/json', "dapr-app-id": "backendapi"},
+            body=json.dumps({"data": {"orderId": str(random.randrange(100))}})
+        )
+        return jsonify({"status": "Order submitted"})
+
+@app.route('/ports')
+def ports():
+    return jsonify({"DAPR_HTTP_PORT": daprPort})
+
+@app.route('/health')
+def health():
+    return jsonify({"status": "healthy"})
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=80)

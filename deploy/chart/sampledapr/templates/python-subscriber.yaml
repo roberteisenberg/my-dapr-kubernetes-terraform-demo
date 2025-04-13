@@ -16,7 +16,7 @@ spec:
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: "python-subscriber"
-        dapr.io/app-port: "5001"  # Match Flask app port
+        dapr.io/app-port: "5001"
         dapr.io/app-protocol: "http"
         dapr.io/metrics-enabled: "true"
     spec:
@@ -24,7 +24,7 @@ spec:
       - name: python-subscriber
         image: reisenberg123/dapr-traffic-control-python-subscriber:1.0
         ports:
-        - containerPort: 5001  # Match Flask app port
+        - containerPort: 5001
         env:
         - name: DAPR_HTTP_PORT
           value: "3500"
@@ -34,14 +34,14 @@ spec:
           value: "http"
         readinessProbe:
           httpGet:
-            path: /health  # Adjust if the app has a health endpoint
+            path: /health
             port: 5001
           initialDelaySeconds: 5
           periodSeconds: 10
           timeoutSeconds: 5
         livenessProbe:
           httpGet:
-            path: /health  # Adjust if the app has a health endpoint
+            path: /health
             port: 5001
           initialDelaySeconds: 15
           periodSeconds: 10
@@ -63,7 +63,7 @@ spec:
         - "--app-id"
         - "python-subscriber"
         - "--app-port"
-        - "5001"  # Match Flask app port
+        - "5001"
         - "--app-protocol"
         - "http"
         - "--log-level"
@@ -122,15 +122,5 @@ spec:
           initialDelaySeconds: 3
           periodSeconds: 6
           timeoutSeconds: 3
-        volumeMounts:
-        - name: dapr-identity-token
-          mountPath: "/var/run/secrets/dapr.io/sentrytoken"
-      volumes:
-      - name: dapr-identity-token
-        projected:
-          sources:
-          - serviceAccountToken:
-              path: dapr.io/sentrytoken
-              expirationSeconds: 7200
       imagePullSecrets:
       - name: docker-registry-secret
