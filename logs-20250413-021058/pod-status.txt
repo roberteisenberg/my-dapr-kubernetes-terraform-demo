@@ -1,0 +1,9 @@
+NAME                                READY   STATUS             RESTARTS        AGE
+backend-667647db87-wm8kn            2/2     Running            0               15m
+orderfrontendapp-675fb5469b-h46zb   1/2     CrashLoopBackOff   9 (2m14s ago)   15m
+python-subscriber-bc75cbf4d-cbbks   1/2     CrashLoopBackOff   9 (2m2s ago)    15m
+redis-master-0                      1/1     Running            0               16m
+redis-replicas-0                    1/1     Running            0               16m
+redis-replicas-1                    1/1     Running            0               15m
+redis-replicas-2                    1/1     Running            0               15m
+zipkin-654bb9c5bf-v7xmq             1/1     Running            0               15m

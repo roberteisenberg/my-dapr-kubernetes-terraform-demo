@@ -1,0 +1,143 @@
+Name:             python-subscriber-bc75cbf4d-cbbks
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             minikube/192.168.49.2
+Start Time:       Sun, 13 Apr 2025 01:55:39 -0700
+Labels:           app=python-subscriber
+                  pod-template-hash=bc75cbf4d
+Annotations:      dapr.io/app-id: python-subscriber
+                  dapr.io/app-port: 5001
+                  dapr.io/app-protocol: http
+                  dapr.io/enabled: true
+                  dapr.io/metrics-enabled: true
+Status:           Running
+IP:               10.244.0.21
+IPs:
+  IP:           10.244.0.21
+Controlled By:  ReplicaSet/python-subscriber-bc75cbf4d
+Containers:
+  python-subscriber:
+    Container ID:   docker://eda41581394db0afc0b21bd7ea265cbd8c930517d2998ce632e284d34d0e5a07
+    Image:          reisenberg123/dapr-traffic-control-python-subscriber:1.0
+    Image ID:       docker-pullable://reisenberg123/dapr-traffic-control-python-subscriber@sha256:54941ad1a89426708708cacfaf2ba231dcddbd91243b310ed2b7a8e51590fd16
+    Port:           5001/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sun, 13 Apr 2025 01:55:55 -0700
+    Ready:          True
+    Restart Count:  0
+    Liveness:       http-get http://:5001/health delay=15s timeout=5s period=10s #success=1 #failure=3
+    Readiness:      http-get http://:5001/health delay=5s timeout=5s period=10s #success=1 #failure=3
+    Environment:
+      DAPR_HTTP_PORT:  3500
+      DAPR_GRPC_PORT:  50001
+      APP_PROTOCOL:    http
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-488hr (ro)
+  daprd:
+    Container ID:  docker://1945fc9907c1f2ab2c6e678287f51ace29176889a80f505853fa6057adfe529e
+    Image:         ghcr.io/dapr/daprd:1.15.4
+    Image ID:      docker-pullable://ghcr.io/dapr/daprd@sha256:1a13621bb593b2212b97c96975224637be3ee1be98ab9a07d1c4feb1562b83d8
+    Port:          <none>
+    Host Port:     <none>
+    Command:
+      /daprd
+    Args:
+      --dapr-http-port
+      3500
+      --dapr-grpc-port
+      50001
+      --dapr-internal-grpc-port
+      50002
+      --dapr-listen-addresses
+      [::1],127.0.0.1
+      --dapr-public-port
+      3501
+      --app-id
+      python-subscriber
+      --app-port
+      5001
+      --app-protocol
+      http
+      --log-level
+      debug
+      --dapr-graceful-shutdown-seconds
+      -1
+      --mode
+      kubernetes
+      --control-plane-address
+      dapr-api.dapr-system.svc.cluster.local:443
+      --sentry-address
+      dapr-sentry.dapr-system.svc.cluster.local:443
+      --enable-metrics
+      --metrics-port
+      9090
+      --placement-host-address
+      dapr-placement-server.dapr-system.svc.cluster.local:50005
+    State:          Waiting
+      Reason:       CrashLoopBackOff
+    Last State:     Terminated
+      Reason:       Error
+      Exit Code:    1
+      Started:      Sun, 13 Apr 2025 02:08:39 -0700
+      Finished:     Sun, 13 Apr 2025 02:08:57 -0700
+    Ready:          False
+    Restart Count:  9
+    Liveness:       tcp-socket :3501 delay=3s timeout=3s period=6s #success=1 #failure=3
+    Readiness:      http-get http://:3501/v1.0/healthz delay=3s timeout=3s period=6s #success=1 #failure=3
+    Environment:
+      NAMESPACE:                          default
+      DAPR_TRUST_ANCHORS:                 -----BEGIN CERTIFICATE-----
+                                          MIIBcDCCARegAwIBAgIRAPAEhAQq2j4sPFPmfGNH5AkwCgYIKoZIzj0EAwIwGDEW
+                                          MBQGA1UEChMNY2x1c3Rlci5sb2NhbDAeFw0yNTA0MTMwNzI3MTBaFw0yNjA0MTMw
+                                          NzQyMTBaMBgxFjAUBgNVBAoTDWNsdXN0ZXIubG9jYWwwWTATBgcqhkjOPQIBBggq
+                                          hkjOPQMBBwNCAASEZVG7D77ZAGJb7Tif4XcRuPRm6B2EOfk8RAgiLIqb+WoN6J0b
+                                          Ooo/p+p4TuX51Ha8AOx2h23pVxJ+RBaM9VvLo0IwQDAOBgNVHQ8BAf8EBAMCAqQw
+                                          DwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUCfw3maNguTgbeJQcclVtHrACMrQw
+                                          CgYIKoZIzj0EAwIDRwAwRAIgdyVvOidTdkFLdfvgJVuh8N6UC1gXLgGrSLKlL4hl
+                                          NrsCIB+qaP8+1pfyUnmeLgiG8VwWCUMWe3gn/ZWUAZPRSUbk
+                                          -----END CERTIFICATE-----
+                                          
+      POD_NAME:                           python-subscriber-bc75cbf4d-cbbks (v1:metadata.name)
+      DAPR_CONTROLPLANE_NAMESPACE:        dapr-system
+      DAPR_CONTROLPLANE_TRUST_DOMAIN:     cluster.local
+      DAPR_SCHEDULER_HOST_ADDRESS:        dapr-scheduler-server-0.dapr-scheduler-server.dapr-system.svc.cluster.local:50006,dapr-scheduler-server-1.dapr-scheduler-server.dapr-system.svc.cluster.local:50006,dapr-scheduler-server-2.dapr-scheduler-server.dapr-system.svc.cluster.local:50006
+      DAPR_SCHEDULER_HOST_ADDRESS_DNS_A:  dapr-scheduler-server-a.dapr-system.svc.cluster.local:443
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-488hr (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       False 
+  ContainersReady             False 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-488hr:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age                From               Message
+  ----     ------     ----               ----               -------
+  Normal   Scheduled  15m                default-scheduler  Successfully assigned default/python-subscriber-bc75cbf4d-cbbks to minikube
+  Normal   Pulling    15m                kubelet            Pulling image "reisenberg123/dapr-traffic-control-python-subscriber:1.0"
+  Normal   Pulled     15m                kubelet            Successfully pulled image "reisenberg123/dapr-traffic-control-python-subscriber:1.0" in 7.085s (14.108s including waiting). Image size: 58293218 bytes.
+  Normal   Created    15m                kubelet            Created container python-subscriber
+  Normal   Started    15m                kubelet            Started container python-subscriber
+  Normal   Pulling    15m                kubelet            Pulling image "ghcr.io/dapr/daprd:1.15.4"
+  Normal   Pulled     14m                kubelet            Successfully pulled image "ghcr.io/dapr/daprd:1.15.4" in 5.33s (15.354s including waiting). Image size: 201834259 bytes.
+  Normal   Created    14m (x2 over 14m)  kubelet            Created container daprd
+  Normal   Started    14m (x2 over 14m)  kubelet            Started container daprd
+  Normal   Killing    14m                kubelet            Container daprd failed liveness probe, will be restarted
+  Normal   Pulled     14m                kubelet            Container image "ghcr.io/dapr/daprd:1.15.4" already present on machine
+  Warning  Unhealthy  14m (x7 over 14m)  kubelet            Readiness probe failed: Get "http://10.244.0.21:3501/v1.0/healthz": dial tcp 10.244.0.21:3501: connect: connection refused
+  Warning  Unhealthy  14m (x6 over 14m)  kubelet            Liveness probe failed: dial tcp 10.244.0.21:3501: connect: connection refused
+  Warning  BackOff    4s (x62 over 13m)  kubelet            Back-off restarting failed container daprd in pod python-subscriber-bc75cbf4d-cbbks_default(2f1f47c6-c845-42fb-844f-0c34ca1282d6)

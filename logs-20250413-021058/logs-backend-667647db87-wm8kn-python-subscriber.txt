@@ -1,0 +1,1 @@
+error: container python-subscriber is not valid for pod backend-667647db87-wm8kn

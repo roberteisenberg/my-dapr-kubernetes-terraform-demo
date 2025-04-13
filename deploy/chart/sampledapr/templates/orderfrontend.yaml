@@ -76,26 +76,12 @@ spec:
         - "kubernetes"
         - "--control-plane-address"
         - "dapr-api.dapr-system.svc.cluster.local:443"
-        - "--sentry-address"
-        - "dapr-sentry.dapr-system.svc.cluster.local:443"
         - "--enable-metrics"
         - "--placement-host-address"
         - "dapr-placement-server.dapr-system.svc.cluster.local:50005"
         env:
         - name: NAMESPACE
           value: "default"
-        - name: DAPR_TRUST_ANCHORS
-          value: |
-            -----BEGIN CERTIFICATE-----
-            MIIBcDCCARegAwIBAgIRAPAEhAQq2j4sPFPmfGNH5AkwCgYIKoZIzj0EAwIwGDEW
-            MBQGA1UEChMNY2x1c3Rlci5sb2NhbDAeFw0yNTA0MTMwNzI3MTBaFw0yNjA0MTMw
-            NzQyMTBaMBgxFjAUBgNVBAoTDWNsdXN0ZXIubG9jYWwwWTATBgcqhkjOPQIBBggq
-            hkjOPQMBBwNCAASEZVG7D77ZAGJb7Tif4XcRuPRm6B2EOfk8RAgiLIqb+WoN6J0b
-            Ooo/p+p4TuX51Ha8AOx2h23pVxJ+RBaM9VvLo0IwQDAOBgNVHQ8BAf8EBAMCAqQw
-            DwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4EFgQUCfw3maNguTgbeJQcclVtHrACMrQw
-            CgYIKoZIzj0EAwIDRwAwRAIgdyVvOidTdkFLdfvgJVuh8N6UC1gXLgGrSLKlL4hl
-            NrsCIB+qaP8+1pfyUnmeLgiG8VwWCUMWe3gn/ZWUAZPRSUbk
-            -----END CERTIFICATE-----
         - name: POD_NAME
           valueFrom:
             fieldRef:
