@@ -2,18 +2,18 @@
 
 # Script to automate log collection for Kubernetes pods
 # Usage: ./collect-logs.sh [--namespace <namespace>] [--pods <pod1,pod2,...>] [--containers <container1,container2,...>]
-# Example: ./collect-logs.sh --namespace default --pods orderfrontendapp-6767bb8d54-pnzxj,python-subscriber-6745d57bc9-9hj5h --containers daprd
+# Example: ./collect-logs.sh --namespace default --pods backend-667647db87-wm8kn,orderfrontendapp-675fb5469b-h46zb,python-subscriber-bc75cbf4d-cbbks --containers daprd,orderfrontendapp,python-subscriber,backend
 
 # Default values
 NAMESPACE="default"
 PODS=""
 CONTAINERS="daprd"  # Default container to collect logs from
-OUTPUT_DIR="logs-$(date +%Y%m%d-%H%M%S)"
+OUTPUT_DIR="logs/logs-$(date +%Y%m%d-%H%M%S)"
 
 # Function to display usage
 usage() {
     echo "Usage: $0 [--namespace <namespace>] [--pods <pod1,pod2,...>] [--containers <container1,container2,...>]"
-    echo "Example: $0 --namespace default --pods orderfrontendapp-6767bb8d54-pnzxj,python-subscriber-6745d57bc9-9hj5h --containers daprd"
+    echo "Example: $0 --namespace default --pods backend-667647db87-wm8kn,orderfrontendapp-675fb5469b-h46zb,python-subscriber-bc75cbf4d-cbbks --containers daprd,orderfrontendapp,python-subscriber,backend"
     exit 1
 }
 
@@ -50,11 +50,25 @@ kubectl get pods -n "$NAMESPACE" > "$OUTPUT_DIR/pod-status.txt"
 for POD in "${POD_ARRAY[@]}"; do
     echo "Collecting data for pod: $POD"
 
+    # Check if the pod exists
+    if ! kubectl get pod "$POD" -n "$NAMESPACE" &>/dev/null; then
+        echo "Error: Pod $POD not found in namespace $NAMESPACE. Skipping..." >&2
+        echo "Pod $POD not found in namespace $NAMESPACE" > "$OUTPUT_DIR/describe-$POD.txt"
+        continue
+    fi
+
     # Collect pod description
     kubectl describe pod "$POD" -n "$NAMESPACE" > "$OUTPUT_DIR/describe-$POD.txt"
 
     # Collect logs for each specified container in the pod
     for CONTAINER in "${CONTAINER_ARRAY[@]}"; do
+        # Check if the container exists in the pod
+        if ! kubectl get pod "$POD" -n "$NAMESPACE" -o jsonpath="{.spec.containers[?(@.name==\"$CONTAINER\")].name}" | grep -q "$CONTAINER"; then
+            echo "Container $CONTAINER not found in pod $POD. Skipping..." >&2
+            echo "Container $CONTAINER not found in pod $POD" > "$OUTPUT_DIR/logs-$POD-$CONTAINER.txt"
+            continue
+        fi
+
         echo "Collecting logs for container $CONTAINER in pod $POD..."
         kubectl logs "$POD" -c "$CONTAINER" -n "$NAMESPACE" > "$OUTPUT_DIR/logs-$POD-$CONTAINER.txt" 2>&1
     done

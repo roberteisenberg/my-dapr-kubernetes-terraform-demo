@@ -1,1 +1,0 @@
-error: container orderfrontendapp is not valid for pod python-subscriber-bc75cbf4d-cbbks

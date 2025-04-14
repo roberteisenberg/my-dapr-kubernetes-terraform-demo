@@ -1,9 +1,0 @@
-NAME                                     READY   STATUS    RESTARTS      AGE
-dapr-dashboard-789795555d-bzrlm          1/1     Running   0             15m
-dapr-operator-69846b7b96-xfl8z           1/1     Running   0             16m
-dapr-placement-server-0                  1/1     Running   0             16m
-dapr-scheduler-server-0                  1/1     Running   0             16m
-dapr-scheduler-server-1                  1/1     Running   0             16m
-dapr-scheduler-server-2                  1/1     Running   0             16m
-dapr-sentry-6fb4c68b8-2h8qx              1/1     Running   0             16m
-dapr-sidecar-injector-68d54fdf54-lqns9   1/1     Running   1 (15m ago)   16m

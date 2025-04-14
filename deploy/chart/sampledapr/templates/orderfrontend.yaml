@@ -88,12 +88,6 @@ spec:
               fieldPath: metadata.name
         - name: DAPR_CONTROLPLANE_NAMESPACE
           value: "dapr-system"
-        - name: DAPR_CONTROLPLANE_TRUST_DOMAIN
-          value: "cluster.local"
-        - name: DAPR_SCHEDULER_HOST_ADDRESS
-          value: "dapr-scheduler-server-0.dapr-scheduler-server.dapr-system.svc.cluster.local:50006,dapr-scheduler-server-1.dapr-scheduler-server.dapr-system.svc.cluster.local:50006,dapr-scheduler-server-2.dapr-scheduler-server.dapr-system.svc.cluster.local:50006"
-        - name: DAPR_SCHEDULER_HOST_ADDRESS_DNS_A
-          value: "dapr-scheduler-server-a.dapr-system.svc.cluster.local:443"
         readinessProbe:
           httpGet:
             path: /v1.0/healthz
